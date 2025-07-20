@@ -135,6 +135,5 @@ The backend exposes the following API endpoints:
 
 ### Future Enhancements
 
-- **Multi-platform Integration:** We plan to integrate with other e-commerce platforms like Shopify and WooCommerce.
 - **Advanced Analytics:** We hope to implement more advanced analytics, such as customer sentiment analysis and competitor tracking.
 - **Mobile Application:** A native mobile app for both iOS and Android is on our roadmap to provide sellers with on-the-go access.
