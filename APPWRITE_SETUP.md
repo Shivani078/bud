@@ -59,6 +59,32 @@ You need to create one database and two collections: one for `products` and one 
 8.  Check the boxes to grant `Create`, `Read`, `Update`, and `Delete` permissions.
 9.  Click **"Update"**.
 
+### D. Create the "Purchase Orders" Collection
+
+1.  Go back to your `bud_db` database view.
+2.  Click **"Create collection"** and name it `purchase_orders`.
+3.  Navigate to the **"Attributes"** tab and add the following:
+    *   **Attribute ID:** `order_id`, **Type:** `String`, **Size:** `255`, check **Required**.
+    *   **Attribute ID:** `description`, **Type:** `String`, **Size:** `10000`, check **Required**.
+    *   **Attribute ID:** `amount`, **Type:** `Float`, check **Required**.
+    *   **Attribute ID:** `status`, **Type:** `String`, **Size:** `50`, check **Required**.
+    *   **Attribute ID:** `supplier_name`, **Type:** `String`, **Size:** `255`, Not Required.
+    *   **Attribute ID:** `order_date`, **Type:** `Datetime`, check **Required**.
+4.  Navigate to the **"Settings"** tab and grant `Read` permission to the `Any` role.
+
+### E. Create the "Sales Orders" Collection
+
+1.  Go back to your `bud_db` database view.
+2.  Click **"Create collection"** and name it `sales_orders`.
+3.  Navigate to the **"Attributes"** tab and add the following:
+    *   **Attribute ID:** `order_id`, **Type:** `String`, **Size:** `255`, check **Required**.
+    *   **Attribute ID:** `description`, **Type:** `String`, **Size:** `10000`, check **Required**.
+    *   **Attribute ID:** `amount`, **Type:** `Float`, check **Required**.
+    *   **Attribute ID:** `status`, **Type:** `String`, **Size:** `50`, check **Required**.
+    *   **Attribute ID:** `platform`, **Type:** `String`, **Size:** `100`, check **Required**.
+    *   **Attribute ID:** `order_date`, **Type:** `Datetime`, check **Required**.
+4.  Navigate to the **"Settings"** tab and grant `Read` permission to the `Any` role.
+
 ## Step 3: Get API Keys and Update Your Local `.env` File
 
 You will need credentials from both Appwrite and OpenWeatherMap.
@@ -71,6 +97,8 @@ You will need credentials from both Appwrite and OpenWeatherMap.
     *   `VITE_APPWRITE_DB_ID`: Go to **Databases** > `bud_db` > **Settings**. Copy the **Database ID**.
     *   `VITE_APPWRITE_COLLECTION_ID`: Go to **Databases** > `bud_db` > `products` > **Settings**. Copy the **Collection ID**.
     *   `VITE_APPWRITE_CHAT_COLLECTION_ID`: Go to **Databases** > `bud_db` > `chat_history` > **Settings**. Copy the **Collection ID**.
+    *   `VITE_APPWRITE_PURCHASE_ORDERS_ID`: Go to **Databases** > `bud_db` > `purchase_orders` > **Settings**. Copy the **Collection ID**.
+    *   `VITE_APPWRITE_SALES_ORDERS_ID`: Go to **Databases** > `bud_db` > `sales_orders` > **Settings**. Copy the **Collection ID**.
 
 ### B. Get OpenWeatherMap API Key
 
@@ -89,6 +117,8 @@ Create or open your `.env` file in the root of the project (`bud/.env`) and add 
     VITE_APPWRITE_DB_ID="YOUR_DATABASE_ID_HERE"
     VITE_APPWRITE_COLLECTION_ID="YOUR_PRODUCTS_COLLECTION_ID_HERE"
     VITE_APPWRITE_CHAT_COLLECTION_ID="YOUR_CHAT_HISTORY_COLLECTION_ID_HERE"
+    VITE_APPWRITE_PURCHASE_ORDERS_ID="YOUR_PURCHASE_ORDERS_COLLECTION_ID_HERE"
+    VITE_APPWRITE_SALES_ORDERS_ID="YOUR_SALES_ORDERS_COLLECTION_ID_HERE"
     VITE_APPWRITE_BUCKET_ID="YOUR_PRODUCT_IMAGES_BUCKET_ID_HERE"
 
     # AI Service & Weather API Keys
@@ -153,6 +183,8 @@ VITE_APPWRITE_PROJECT_ID="YOUR_PROJECT_ID_HERE"
 VITE_APPWRITE_DB_ID=YOUR_DATABASE_ID
 VITE_APPWRITE_COLLECTION_ID=YOUR_PRODUCTS_COLLECTION_ID
 VITE_APPWRITE_CHAT_COLLECTION_ID=YOUR_CHAT_HISTORY_COLLECTION_ID
+VITE_APPWRITE_PURCHASE_ORDERS_ID=YOUR_PURCHASE_ORDERS_COLLECTION_ID
+VITE_APPWRITE_SALES_ORDERS_ID=YOUR_SALES_ORDERS_COLLECTION_ID
 VITE_APPWRITE_BUCKET_ID=YOUR_PRODUCT_IMAGES_BUCKET_ID
 
 # AI Service & Weather API Keys

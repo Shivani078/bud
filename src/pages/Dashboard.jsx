@@ -21,6 +21,28 @@ const APPWRITE_DB_ID = import.meta.env.VITE_APPWRITE_DB_ID;
 const APPWRITE_COLLECTION_ID = import.meta.env.VITE_APPWRITE_COLLECTION_ID;
 const APPWRITE_PROFILES_COLLECTION_ID = import.meta.env.VITE_APPWRITE_PROFILES_COLLECTION_ID;
 
+const iconMap = {
+    Package,
+    Star,
+    RotateCcw,
+    Zap,
+    Plus,
+    TrendingUp
+};
+
+const statusColorMap = {
+    // For Purchase Orders
+    "Delivered": "bg-green-500",
+    "Pending": "bg-orange-500",
+    "Processing": "bg-purple-500",
+    // For Sales Orders
+    "Completed": "bg-green-500",
+    "Shipped": "bg-blue-500",
+    "Confirmed": "bg-yellow-500",
+    "New": "bg-orange-500",
+    "default": "bg-gray-500"
+};
+
 const Dashboard = () => {
     const [activeTab, setActiveTab] = useState('dashboard');
     const [notifications] = useState([
@@ -33,6 +55,11 @@ const Dashboard = () => {
     const [products, setProducts] = useState([]);
     const [aiSummary, setAiSummary] = useState(null);
     const [isSummaryLoading, setIsSummaryLoading] = useState(true);
+    const [kpiCards, setKpiCards] = useState([]);
+    const [productDetails, setProductDetails] = useState([]);
+    const [topSellingItems, setTopSellingItems] = useState([]);
+    const [purchaseOrders, setPurchaseOrders] = useState([]);
+    const [salesOrders, setSalesOrders] = useState([]);
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -53,13 +80,6 @@ const Dashboard = () => {
         { id: 'profile', label: 'Profile & Settings', icon: User },
     ];
 
-    const kpiCards = [
-        { title: 'Stocked Items', value: '247', change: '+12', trend: 'up', icon: Package },
-        { title: 'Best Seller', value: 'Silk Saree', subtitle: '₹2,850', trend: 'up', icon: Star },
-        { title: 'Return Rate', value: '2.3%', change: '-0.5%', trend: 'down', icon: RotateCcw },
-        { title: 'AI Suggestions Taken', value: '18', change: '+5', trend: 'up', icon: Zap }
-    ];
-
     const quickActions = [
         { label: 'Add Product', icon: Plus, color: 'bg-blue-500' },
         { label: 'View Local Trends', icon: TrendingUp, color: 'bg-green-500' },
@@ -72,6 +92,29 @@ const Dashboard = () => {
             setActiveTab('addProduct');
             navigate('/', { replace: true });
         }
+
+        const fetchDashboardData = async () => {
+            try {
+                const [kpisRes, detailsRes, topItemsRes, poRes, soRes] = await Promise.all([
+                    fetch(`${backendURL}/api/dashboard/kpis`),
+                    fetch(`${backendURL}/api/dashboard/product-details`),
+                    fetch(`${backendURL}/api/dashboard/top-selling-items`),
+                    fetch(`${backendURL}/api/dashboard/purchase-orders`),
+                    fetch(`${backendURL}/api/dashboard/sales-orders`)
+                ]);
+
+                setKpiCards(await kpisRes.json());
+                setProductDetails(await detailsRes.json());
+                setTopSellingItems(await topItemsRes.json());
+                setPurchaseOrders(await poRes.json());
+                setSalesOrders(await soRes.json());
+
+            } catch (error) {
+                console.error("Failed to fetch dashboard data:", error);
+            }
+        };
+
+        fetchDashboardData();
     }, [location, navigate]);
 
     useEffect(() => {
@@ -267,22 +310,25 @@ const Dashboard = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {kpiCards.map((card, index) => (
-                    <div key={index} className="bg-white rounded-lg p-6 border border-gray-200 hover:shadow-md transition-shadow">
-                        <div className="flex items-center justify-between mb-3">
-                            <card.icon className="w-8 h-8 text-blue-600" />
-                            {card.trend && (
-                                <span className={`flex items-center gap-1 text-sm ${card.trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
-                                    {card.trend === 'up' ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />}
-                                    {card.change}
-                                </span>
-                            )}
+                {kpiCards.map((card, index) => {
+                    const IconComponent = iconMap[card.icon];
+                    return (
+                        <div key={index} className="bg-white rounded-lg p-6 border border-gray-200 hover:shadow-md transition-shadow">
+                            <div className="flex items-center justify-between mb-3">
+                                {IconComponent && <IconComponent className="w-8 h-8 text-blue-600" />}
+                                {card.trend && (
+                                    <span className={`flex items-center gap-1 text-sm ${card.trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
+                                        {card.trend === 'up' ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />}
+                                        {card.change}
+                                    </span>
+                                )}
+                            </div>
+                            <h3 className="text-2xl font-bold text-gray-800 mb-1">{card.value}</h3>
+                            <p className="text-gray-600 text-sm">{card.title}</p>
+                            {card.subtitle && <p className="text-gray-500 text-xs mt-1">{card.subtitle}</p>}
                         </div>
-                        <h3 className="text-2xl font-bold text-gray-800 mb-1">{card.value}</h3>
-                        <p className="text-gray-600 text-sm">{card.title}</p>
-                        {card.subtitle && <p className="text-gray-500 text-xs mt-1">{card.subtitle}</p>}
-                    </div>
-                ))}
+                    );
+                })}
             </div>
 
             <div className="bg-white rounded-lg p-6 border border-gray-200">
@@ -306,10 +352,12 @@ const Dashboard = () => {
                         <span className="text-sm text-gray-500">This Month</span>
                     </div>
                     <div className="space-y-3">
-                        <div className="flex justify-between items-center"><span>Low Stock Items</span><span className="font-bold text-red-500">9</span></div>
-                        <div className="flex justify-between items-center"><span>All Item Groups</span><span className="font-bold">2</span></div>
-                        <div className="flex justify-between items-center"><span>All Items</span><span className="font-bold">21</span></div>
-                        <div className="flex justify-between items-center"><span>Unconfirmed Items</span><span className="font-bold">0</span></div>
+                        {productDetails.map(detail => (
+                            <div key={detail.label} className="flex justify-between items-center">
+                                <span>{detail.label}</span>
+                                <span className={`font-bold ${detail.label === 'Low Stock Items' ? 'text-red-500' : ''}`}>{detail.value}</span>
+                            </div>
+                        ))}
                     </div>
                 </div>
 
@@ -320,22 +368,13 @@ const Dashboard = () => {
                         <span className="text-sm text-gray-500">This Month</span>
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-                        <div>
-                            <div className="bg-gray-100 rounded-lg p-3 mb-2 inline-block"><Package/></div>
-                            <p className="font-semibold">silk saree</p><p className="text-sm text-gray-500">52 pcs</p>
-                        </div>
-                        <div>
-                            <div className="bg-gray-100 rounded-lg p-3 mb-2 inline-block"><Package/></div>
-                            <p className="font-semibold">Multi-color Bedsheet</p><p className="text-sm text-gray-500">41 pcs</p>
-                        </div>
-                        <div>
-                            <div className="bg-gray-100 rounded-lg p-3 mb-2 inline-block"><Package/></div>
-                            <p className="font-semibold">Cotton kurti</p><p className="text-sm text-gray-500">13 pcs</p>
-                        </div>
-                        <div>
-                            <div className="bg-gray-100 rounded-lg p-3 mb-2 inline-block"><Package/></div>
-                            <p className="font-semibold">Dupatta</p><p className="text-sm text-gray-500">14 pcs</p>
-                        </div>
+                        {topSellingItems.map(item => (
+                            <div key={item.name}>
+                                <div className="bg-gray-100 rounded-lg p-3 mb-2 inline-block"><Package/></div>
+                                <p className="font-semibold">{item.name}</p>
+                                <p className="text-sm text-gray-500">{item.quantity} pcs</p>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>
@@ -348,43 +387,23 @@ const Dashboard = () => {
                         <span className="text-sm text-gray-500">This Month</span>
                     </div>
                     <div className="space-y-4">
-                        <div className="flex items-center">
-                            <span className="h-3 w-3 rounded-full bg-blue-500 mr-3"></span>
-                            <div className="flex-1">
-                                <p className="font-semibold">PO-2024-001</p>
-                                <p className="text-sm text-gray-500">Silk Saree Collection</p>
+                        {purchaseOrders.map(order => (
+                            <div key={order.id} className="flex items-center">
+                                <span className={`h-3 w-3 rounded-full ${statusColorMap[order.status] || statusColorMap.default} mr-3`}></span>
+                                <div className="flex-1">
+                                    <p className="font-semibold">{order.id}</p>
+                                    <p className="text-sm text-gray-500">{order.description}</p>
+                                </div>
+                                <div className="text-right">
+                                    <p className="font-bold">₹{order.amount.toLocaleString()}</p>
+                                    <p className={`text-sm font-semibold ${statusColorMap[order.status]?.replace('bg-', 'text-') || 'text-gray-500'}`}>{order.status}</p>
+                                </div>
                             </div>
-                            <div className="text-right">
-                                <p className="font-bold">₹45,000</p>
-                                <p className="text-sm text-green-500">Delivered</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center">
-                            <span className="h-3 w-3 rounded-full bg-orange-500 mr-3"></span>
-                            <div className="flex-1">
-                                <p className="font-semibold">PO-2024-002</p>
-                                <p className="text-sm text-gray-500">Traditional Jewelry</p>
-                            </div>
-                            <div className="text-right">
-                                <p className="font-bold">₹28,500</p>
-                                <p className="text-sm text-orange-500">Pending</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center">
-                            <span className="h-3 w-3 rounded-full bg-purple-500 mr-3"></span>
-                            <div className="flex-1">
-                                <p className="font-semibold">PO-2024-003</p>
-                                <p className="text-sm text-gray-500">Festival Decorations</p>
-                            </div>
-                            <div className="text-right">
-                                <p className="font-bold">₹12,200</p>
-                                <p className="text-sm text-purple-500">Processing</p>
-                            </div>
-                        </div>
+                        ))}
                     </div>
                     <div className="pt-4 mt-4 border-t border-gray-200 flex justify-between items-center">
-                        <span className="font-semibold">Total Orders: 3</span>
-                        <span className="font-bold text-lg">₹85,700</span>
+                        <span className="font-semibold">Total Orders: {purchaseOrders.length}</span>
+                        <span className="font-bold text-lg">₹{purchaseOrders.reduce((acc, o) => acc + o.amount, 0).toLocaleString()}</span>
                     </div>
                 </div>
 
@@ -394,55 +413,31 @@ const Dashboard = () => {
                         <h3 className="font-semibold text-gray-800">SALES ORDER</h3>
                         <span className="text-sm text-gray-500">This Month</span>
                     </div>
-                    <div className="space-y-4">
-                         <div className="flex items-center">
-                            <span className="h-3 w-3 rounded-full bg-green-500 mr-3"></span>
-                            <div className="flex-1">
-                                <p className="font-semibold">SO-2024-015</p>
-                                <p className="text-sm text-gray-500">Banarasi Silk Saree</p>
-                            </div>
-                            <div className="text-right">
-                                <p className="font-bold">₹8,500</p>
-                                <p className="text-sm text-green-500">Completed</p>
-                            </div>
+                    {salesOrders.length > 0 ? (
+                        <div className="space-y-4">
+                            {salesOrders.map(order => (
+                                <div key={order.id} className="flex items-center">
+                                    <span className={`h-3 w-3 rounded-full ${statusColorMap[order.status] || statusColorMap.default} mr-3`}></span>
+                                    <div className="flex-1">
+                                        <p className="font-semibold">{order.id}</p>
+                                        <p className="text-sm text-gray-500">{order.description}</p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="font-bold">₹{order.amount.toLocaleString()}</p>
+                                        <p className={`text-sm font-semibold ${statusColorMap[order.status]?.replace('bg-', 'text-') || 'text-gray-500'}`}>{order.status}</p>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
-                        <div className="flex items-center">
-                            <span className="h-3 w-3 rounded-full bg-blue-500 mr-3"></span>
-                            <div className="flex-1">
-                                <p className="font-semibold">SO-2024-016</p>
-                                <p className="text-sm text-gray-500">Gold Plated Earrings</p>
-                            </div>
-                            <div className="text-right">
-                                <p className="font-bold">₹2,200</p>
-                                <p className="text-sm text-blue-500">Shipped</p>
-                            </div>
+                    ) : (
+                        <div className="text-center text-gray-500 py-4">
+                            <p>No sales orders to display.</p>
+                            <p className="text-xs mt-2">In a production environment, this would be updated automatically via an integration with your e-commerce platform (e.g., a webhook from Meesho).</p>
                         </div>
-                        <div className="flex items-center">
-                            <span className="h-3 w-3 rounded-full bg-yellow-500 mr-3"></span>
-                            <div className="flex-1">
-                                <p className="font-semibold">SO-2024-017</p>
-                                <p className="text-sm text-gray-500">Rakhi Gift Set</p>
-                            </div>
-                            <div className="text-right">
-                                <p className="font-bold">₹1,800</p>
-                                <p className="text-sm text-yellow-500">Confirmed</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center">
-                            <span className="h-3 w-3 rounded-full bg-pink-500 mr-3"></span>
-                            <div className="flex-1">
-                                <p className="font-semibold">SO-2024-018</p>
-                                <p className="text-sm text-gray-500">Traditional Kurta Set</p>
-                            </div>
-                            <div className="text-right">
-                                <p className="font-bold">₹3,500</p>
-                                <p className="text-sm text-pink-500">New</p>
-                            </div>
-                        </div>
-                    </div>
+                    )}
                      <div className="pt-4 mt-4 border-t border-gray-200 flex justify-between items-center">
-                        <span className="font-semibold">Total Orders: 4</span>
-                        <span className="font-bold text-lg">₹16,000</span>
+                        <span className="font-semibold">Total Orders: {salesOrders.length}</span>
+                        <span className="font-bold text-lg">₹{salesOrders.reduce((acc, o) => acc + o.amount, 0).toLocaleString()}</span>
                     </div>
                 </div>
             </div>

@@ -74,14 +74,17 @@ To get a local copy up and running, follow these simple steps.
     VITE_FIREBASE_STORAGE_BUCKET=your_firebase_storage_bucket
     VITE_FIREBASE_MESSAGING_SENDER_ID=your_firebase_messaging_sender_id
     VITE_FIREBASE_APP_ID=your_firebase_app_id
+
+    VITE_APPWRITE_API_KEY=your_appwrite_api_key
     VITE_APPWRITE_ENDPOINT=your_appwrite_endpoint
     VITE_APPWRITE_PROJECT_ID=your_appwrite_project_id
     VITE_APPWRITE_DB_ID=your_appwrite_db_id
     VITE_APPWRITE_COLLECTION_ID=your_appwrite_collection_id
     VITE_APPWRITE_BUCKET_ID=your_appwrite_bucket_id
-    VITE_APPWRITE_ORDERSUM_COLLECTION_ID=your_appwrite_ordersum_collection_id
     VITE_APPWRITE_PROFILES_COLLECTION_ID=your_appwrite_profiles_collection_id
     VITE_APPWRITE_CHAT_COLLECTION_ID=your_appwrite_chat_collection_id
+    VITE_APPWRITE_PURCHASE_ORDERS_ID=your_appwrite_purchase_orders_id
+    VITE_APPWRITE_SALES_ORDERS_ID=your_appwrite_sales_orders_id
     VITE_BACKEND_URL=your_backend_url
     ```
 4. **Run the development server:**
