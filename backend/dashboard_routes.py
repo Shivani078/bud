@@ -5,7 +5,8 @@ from typing import List, Dict, Any, Optional
 from collections import Counter
 
 # --- Custom Utility Import ---
-from utils import get_rich_context, get_appwrite_client
+from utils import get_rich_context
+from appwrite_client import get_db_service, DB_ID, PRODUCTS_COLLECTION_ID, PURCHASE_ORDERS_COLLECTION_ID, SALES_ORDERS_COLLECTION_ID
 
 # --- LangChain Imports ---
 from langchain_groq import ChatGroq
@@ -53,11 +54,6 @@ class Order(BaseModel):
     status: str
     platform: Optional[str] = None
     order_date: Optional[str] = None
-
-DB_ID = os.getenv("VITE_APPWRITE_DB_ID")
-PURCHASE_ORDERS_COLLECTION_ID = os.getenv("VITE_APPWRITE_PURCHASE_ORDERS_ID")
-SALES_ORDERS_COLLECTION_ID = os.getenv("VITE_APPWRITE_SALES_ORDERS_ID")
-PRODUCTS_COLLECTION_ID = os.getenv("VITE_APPWRITE_COLLECTION_ID")
 
 # --- API Endpoint for AI Summary ---
 @router.post("/summary", response_model=AISummary)
@@ -114,7 +110,7 @@ async def get_kpis():
 @router.get("/product-details", response_model=List[ProductDetail])
 async def get_product_details():
     try:
-        db = get_appwrite_client()
+        db = get_db_service()
         response = db.list_documents(
             database_id=DB_ID,
             collection_id=PRODUCTS_COLLECTION_ID
@@ -138,12 +134,13 @@ async def get_product_details():
 @router.get("/top-selling-items", response_model=List[TopSellingItem])
 async def get_top_selling_items():
     try:
-        db = get_appwrite_client()
-        response = db.list_documents(
-            database_id=DB_ID,
-            collection_id=SALES_ORDERS_COLLECTION_ID
-        )
-        sales = response['documents']
+        db = get_db_service()
+        # Fetch both sales and products
+        sales_res = db.list_documents(DB_ID, SALES_ORDERS_COLLECTION_ID)
+        products_res = db.list_documents(DB_ID, PRODUCTS_COLLECTION_ID)
+        
+        sales = sales_res['documents']
+        products = products_res['documents']
         
         # Count occurrences of each product description
         item_counts = Counter(s['description'] for s in sales)
@@ -165,7 +162,7 @@ async def get_top_selling_items():
 @router.get("/purchase-orders", response_model=List[Order])
 async def get_purchase_orders():
     try:
-        db = get_appwrite_client()
+        db = get_db_service()
         response = db.list_documents(
             database_id=DB_ID,
             collection_id=PURCHASE_ORDERS_COLLECTION_ID
@@ -189,7 +186,7 @@ async def get_purchase_orders():
 @router.get("/sales-orders", response_model=List[Order])
 async def get_sales_orders():
     try:
-        db = get_appwrite_client()
+        db = get_db_service()
         response = db.list_documents(
             database_id=DB_ID,
             collection_id=SALES_ORDERS_COLLECTION_ID

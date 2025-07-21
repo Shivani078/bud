@@ -4,33 +4,6 @@ from datetime import datetime, timedelta
 from indian_festivals.festival import IndianFestivals
 import os
 import requests
-from appwrite.client import Client
-from appwrite.services.databases import Databases
-from dotenv import load_dotenv
-
-load_dotenv()
-
-appwrite_client = None
-appwrite_database = None
-
-def get_appwrite_client():
-    global appwrite_client, appwrite_database
-    if appwrite_client is None:
-        endpoint = os.getenv("VITE_APPWRITE_ENDPOINT")
-        project_id = os.getenv("VITE_APPWRITE_PROJECT_ID")
-        api_key = os.getenv("VITE_APPWRITE_API_KEY")
-
-        if not all([endpoint, project_id, api_key]):
-            raise ValueError("Missing Appwrite environment variables. Ensure APPWRITE_ENDPOINT, APPWRITE_PROJECT_ID, and APPWRITE_API_KEY are set.")
-
-        appwrite_client = Client()
-        (appwrite_client
-            .set_endpoint(endpoint)
-            .set_project(project_id)
-            .set_key(api_key)
-        )
-        appwrite_database = Databases(appwrite_client)
-    return appwrite_database
 
 def _get_raw_upcoming_festivals():
     """
