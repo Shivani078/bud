@@ -43,6 +43,13 @@ const statusColorMap = {
     "default": "bg-gray-500"
 };
 
+const getTimeBasedGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good Morning";
+    if (hour < 18) return "Good Afternoon";
+    return "Good Evening";
+};
+
 const Dashboard = () => {
     const [activeTab, setActiveTab] = useState('dashboard');
     const [notifications] = useState([
@@ -241,7 +248,7 @@ const Dashboard = () => {
         <div className="p-6 space-y-6">
             <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 border border-blue-100">
                 <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                    Good Morning, {getUserDisplayName(user)} 👋
+                    {getTimeBasedGreeting()}, {getUserDisplayName(user)} 👋
                 </h2>
                 <p className="text-gray-600 mb-4">Ready to boost your sales today?</p>
                 <div className="bg-white rounded-lg p-4 border border-blue-200">
