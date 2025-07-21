@@ -24,6 +24,7 @@ const ProductListingGenerator = () => {
     const [copiedField, setCopiedField] = useState(null);
     const [translations, setTranslations] = useState({});
     const [translatingLanguage, setTranslatingLanguage] = useState(null);
+    const [improvementInstructions, setImprovementInstructions] = useState("");
     const backendURL = import.meta.env.VITE_BACKEND_URL;
 
     const fileInputRef = useRef(null);
@@ -134,7 +135,10 @@ const ProductListingGenerator = () => {
             const response = await fetch(`${backendURL}/api/listing/improve`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ content: generatedListing }), // Send the whole object
+                body: JSON.stringify({
+                    content: generatedListing,
+                    instructions: improvementInstructions
+                }),
             });
             if (!response.ok) throw new Error((await response.json()).detail);
             const improved = await response.json();
@@ -382,6 +386,14 @@ const ProductListingGenerator = () => {
                                         {isImproving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                                         Improve Content
                                     </button>
+                                </div>
+                                <div className="mt-4">
+                                    <textarea
+                                        value={improvementInstructions}
+                                        onChange={(e) => setImprovementInstructions(e.target.value)}
+                                        placeholder="How can I improve this? (e.g., 'Make it sound more luxurious', 'Add a call to action')"
+                                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                                    />
                                 </div>
 
                                 {currentListing.seo_content && (

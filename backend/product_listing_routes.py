@@ -58,6 +58,7 @@ class ImprovedContent(BaseModel):
 
 class ImproveListingRequest(BaseModel):
     content: GeneratedContent # The full content object to be improved
+    instructions: str # User-provided instructions for improvement
 
 class TranslateRequest(BaseModel):
     content: GeneratedContent
@@ -192,20 +193,21 @@ async def improve_listing_endpoint(request: ImproveListingRequest):
     try:
         # Convert the Pydantic object to a JSON string for the prompt
         content_json_str = request.content.json()
+        instructions = request.instructions
 
         chat_completion = groq_client.chat.completions.create(
             messages=[
                 {
                     "role": "system",
                     "content": (
-                        "You are an expert e-commerce copywriter. Your task is to improve the provided JSON product content. "
-                        "Make titles more catchy, descriptions more persuasive, and conversational phrases more natural. "
+                        "You are an expert e-commerce copywriter. Your task is to improve the provided JSON product content based on the user's instructions. "
+                        "Make titles more catchy, descriptions more persuasive, and conversational phrases more natural, following the user's guidance. "
                         "Do not alter the JSON structure or keys. Respond ONLY with the improved, valid JSON object."
                     )
                 },
                 {
                     "role": "user",
-                    "content": f"Improve this product content: {content_json_str}"
+                    "content": f"Here is the product content in JSON format:\n{content_json_str}\n\nHere are my instructions for improvement:\n{instructions}"
                 }
             ],
             model="gemma2-9b-it",
